@@ -10,19 +10,23 @@ namespace cw1
     {
         static async Task Main(string[] args)
         {
-            var httpClient = new HttpClient();
             var url = args.Length > 0 ? args[0] : "pja.edu.pl";
-            var response = await httpClient.GetAsync(url);
-            if(response.IsSuccessStatusCode)
+            using (var httpClient = new HttpClient())
             {
-                var str = await response.Content.ReadAsStringAsync();
-
-                var emailRegex = new Regex(@"\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*", RegexOptions.IgnoreCase);
-                var emailMatches = emailRegex.Matches(str);
-
-                foreach (var emailMatch in emailMatches)
+                using (var response = await httpClient.GetAsync(url))
                 {
-                    Console.WriteLine(emailMatch);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var str = await response.Content.ReadAsStringAsync();
+
+                        var emailRegex = new Regex(@"\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*", RegexOptions.IgnoreCase);
+                        var emailMatches = emailRegex.Matches(str);
+
+                        foreach (var emailMatch in emailMatches)
+                        {
+                            Console.WriteLine(emailMatch);
+                        }
+                    }
                 }
             }
         }
