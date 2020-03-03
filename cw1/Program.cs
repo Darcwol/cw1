@@ -11,7 +11,8 @@ namespace cw1
         static async Task Main(string[] args)
         {
             var httpClient = new HttpClient();
-            var response = await httpClient.GetAsync("https://www.pja.edu.pl/");
+            var url = args.Length > 0 ? args[0] : "pja.edu.pl";
+            var response = await httpClient.GetAsync(url);
             if(response.IsSuccessStatusCode)
             {
                 var str = await response.Content.ReadAsStringAsync();
