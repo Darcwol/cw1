@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Net.Http;
 using System.Net.Mail;
 using System.Text.RegularExpressions;
@@ -10,25 +11,51 @@ namespace cw1
     {
         static async Task Main(string[] args)
         {
-            var url = args.Length > 0 ? args[0] : "pja.edu.pl";
+            if(args.Length < 1)
+            {
+                throw new ArgumentNullException();
+            }
+            var url = args[0];
             using (var httpClient = new HttpClient())
             {
-                using (var response = await httpClient.GetAsync(url))
+                try 
                 {
-                    if (response.IsSuccessStatusCode)
+                    using (var response = await httpClient.GetAsync(url))
                     {
-                        var str = await response.Content.ReadAsStringAsync();
-
-                        var emailRegex = new Regex(@"\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*", RegexOptions.IgnoreCase);
-                        var emailMatches = emailRegex.Matches(str);
-
-                        foreach (var emailMatch in emailMatches)
+                        if (response.IsSuccessStatusCode)
                         {
-                            Console.WriteLine(emailMatch);
+                            var str = await response.Content.ReadAsStringAsync();
+
+                            var emailRegex = new Regex(@"\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+                            var emailMatches = emailRegex.Matches(str);
+
+                            Hashtable hash = new Hashtable();
+
+                            foreach (var emailMatch in emailMatches)
+                            {
+                                string foundMatch = emailMatch.ToString();
+                                if (hash.Contains(foundMatch) == false)
+                                {
+                                    hash.Add(foundMatch, string.Empty);
+                                    Console.WriteLine(emailMatch);
+                                }
+                            }
+
+                            if(emailMatches.Count == 0)
+                            {
+                                Console.WriteLine("No email found");
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("Error while downloading page");
                         }
                     }
+                } catch (InvalidOperationException ex)
+                {
+                    throw new ArgumentException();
                 }
-            }
+                }
         }
     }
 }
